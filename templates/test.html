@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 10px 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+        }
+        .chrono {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        .message {
+            color: white;
+            background-color: #e74c3c;
+            font-weight: bold;
+            font-size: 22px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 600px;
+            margin: 40px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .question-card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .question-card p {
+            font-weight: bold;
+        }
+        select, input[type="text"] {
+            margin-top: 8px;
+            padding: 6px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Questions</h1>
+        <div class="chrono" id="chronometre">00:00</div>
+    </header>
+
+    <!-- MESSAGE SI AUCUNE QUESTION -->
+    {% if questions|length == 0 %}
+        <div class="message">Aucune question ne correspond à votre sélection.</div>
+    {% endif %} 
+
+    <form method="post" action="{{ url_for('results') }}">
+        {% for question in questions %}
+            <div class="question-card">
+                <div>{{ loop.index }}. {{ question['formatter_question'] | safe }}</div>
+
+                {% if question['Type'] == 'QCM' %}
+                    <label>Choisissez votre réponse :</label>
+                    <select name="reponse_{{ loop.index }}" required>
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+
+                {% elif question['Type'] == 'V/F' %}
+                    <label>Choisissez VRAI ou FAUX :</label>
+                    <select name="reponse_{{ loop.index }}" required>
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="VRAI">VRAI</option>
+                        <option value="FAUX">FAUX</option>
+                    </select>
+
+                {% elif question['Type'] == 'RA' %}
+                    <label>Indiquez la règle (ex: 14, 14.3, R14, R14.3) :</label>
+                    <input type="text" name="reponse_{{ loop.index }}"
+                           pattern="^(R?\d{1,2}(\.\d)?)$"
+                           placeholder="Exemple : 14, 14.3, R14, R14.3" required>
+
+                {% else %}
+                    <input type="text" name="reponse_{{ loop.index }}" placeholder="Votre réponse" required>
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% if questions %}
+            <button type="submit">Soumettre</button>
+        {% endif %}
+    </form>
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/">
+                <button type="button" style="background-color: #3498db;">Retour à l'accueil</button>
+            </a>
+        </div>
+
+    <script>
+        // Chronomètre simple qui démarre à 0
+        let seconds = 0;
+        const chronoEl = document.getElementById('chronometre');
+
+        function updateChrono() {
+            const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const sec = String(seconds % 60).padStart(2, '0');
+            chronoEl.textContent = `${min}:${sec}`;
+            seconds++;
+        }
+
+        setInterval(updateChrono, 1000);
+    </script>
+</body>
+</html>

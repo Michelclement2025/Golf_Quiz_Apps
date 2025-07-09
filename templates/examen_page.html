@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .question {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type=text], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .button-return {
+            background-color: #ffe066;
+            color: #000;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chrono {
+            font-weight: bold;
+            color: red;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ titre }}</h1>
+    <div class="chrono">Temps restant : <span id="timer"></span></div>
+
+    {% if message %}
+        <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <form method="post">
+        <input type="hidden" name="nav_action" id="nav_action" value="next">
+
+        {% for question in questions %}
+        <div class="question">
+            <p>{{ loop.index }}. {{ question.formatter_question | safe }}</p>
+            {% set input_name = 'q' ~ loop.index %}
+            {% set type = question.Type|default("") %}
+
+            {% if type == 'V/F' %}
+                <select name="{{ input_name }}">
+                    <option value="">-- Choisir --</option>
+                    <option value="Vrai" {% if get_answer(page, input_name) == 'Vrai' %}selected{% endif %}>Vrai</option>
+                    <option value="Faux" {% if get_answer(page, input_name) == 'Faux' %}selected{% endif %}>Faux</option>
+                </select>
+
+            {% elif type == 'QCM' %}
+                <select name="{{ input_name }}">
+                    <option value="">-- Choisir --</option>
+                    <option value="A" {% if get_answer(page, input_name) == 'A' %}selected{% endif %}>A</option>
+                    <option value="B" {% if get_answer(page, input_name) == 'B' %}selected{% endif %}>B</option>
+                    <option value="C" {% if get_answer(page, input_name) == 'C' %}selected{% endif %}>C</option>
+                </select>
+
+            {% else %}
+                <input type="text" name="{{ input_name }}" value="{{ get_answer(page, input_name) | default('') }}">
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="buttons">
+            <button type="button" class="button-return" onclick="window.location.href='/'">Retour à l'accueil</button>
+
+            {% if page > 1 %}
+                <button type="submit" onclick="document.getElementById('nav_action').value='prev'">Page précédente</button>
+            {% endif %}
+
+            {% if page < 4 %}
+                <button type="submit" onclick="document.getElementById('nav_action').value='next'">Page suivante</button>
+            {% else %}
+                <button type="submit" formaction="{{ url_for('results_prelim') }}">Soumettre le test</button>
+            {% endif %}
+        </div>
+    </form>
+
+    <script>
+        const totalSeconds = {{ chrono_minutes * 60 }};
+        const key = 'chrono_' + {{ page }};
+        let remaining = sessionStorage.getItem(key) ? parseInt(sessionStorage.getItem(key)) : totalSeconds;
+
+        function updateTimer() {
+            if (remaining <= 0) {
+                document.forms[0].submit();
+                return;
+            }
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            remaining--;
+            sessionStorage.setItem(key, remaining);
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>

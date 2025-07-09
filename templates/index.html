@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrainement aux Règles, sélection du type de test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .image-container {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .form-container {
+            flex: 2;
+            padding: 10px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .section {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .test-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        .test-section {
+            flex: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Entrainement aux Règles, sélection du type de test</h1>
+
+    <form id="quiz-form" method="post" action="/start_test">
+
+        <div class="container">
+            <div class="image-container">
+                <img src="{{ url_for('static', filename='images/Tondeuse_voleuse.png') }}" alt="Image golf" style="max-width: 100%;">
+            </div>
+
+            <div class="form-container">
+                <div class="section">
+                    <label for="mode">Choisissez le type de test :</label>
+                    <select id="mode" name="mode" onchange="toggleSections()">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="test_simple">Test simple</option>
+                        <option value="examen_blanc">Examen blanc</option>
+                    </select>
+                </div>
+
+                <div class="test-options">
+                    <!-- Test simple -->
+                    <div class="test-section" id="section-simple" style="display:none;">
+                        <div class="section">
+                            <label>Type de question :</label>
+                            <select name="Type">
+                                <option value="">-- Tous --</option>
+                                {% for val in types %}
+                                    <option value="{{ val }}">{{ val }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label>Règle :</label>
+                            <select name="Règle">
+                                <option value="">-- Toutes --</option>
+                                {% for val in regles %}
+                                    <option value="{{ val }}">{{ val }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label>Sous-règle :</label>
+                            <select name="Sous-règle">
+                                <option value="">-- Toutes --</option>
+                                {% for val in sous_regles %}
+                                    <option value="{{ val }}">{{ val }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label>Interprétation :</label>
+                            <select name="Interprétations">
+                                <option value="">-- Toutes --</option>
+                                {% for val in interpretations %}
+                                    <option value="{{ val }}">{{ val }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label>Nombre de questions :</label>
+                            <select name="nb_questions">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Examen blanc -->
+                    <div class="test-section" id="section-examen" style="display:none;">
+                        <div class="section">
+                            <label>Examens et concours :</label>
+                            <button type="button" onclick="selectAllExamens()">Sélectionner tous</button>
+                            <select id="examens" name="Examens_et_concours" multiple>
+                                {% for val in examens %}
+                                    <option value="{{ val }}">{{ val }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <button type="submit">Lancer le test</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        function toggleSections() {
+            const mode = document.getElementById("mode").value;
+            document.getElementById("section-simple").style.display = mode === "test_simple" ? "block" : "none";
+            document.getElementById("section-examen").style.display = mode === "examen_blanc" ? "block" : "none";
+        }
+
+        function selectAllExamens() {
+            const select = document.getElementById("examens");
+            for (let option of select.options) {
+                option.selected = true;
+            }
+        }
+
+        document.getElementById("quiz-form").addEventListener("submit", function (e) {
+            const mode = document.getElementById("mode").value;
+            const examens = document.getElementById("examens");
+
+            if (!mode) {
+                alert("Veuillez choisir un type de test.");
+                e.preventDefault();
+                return;
+            }
+
+            if (mode === "examen_blanc") {
+                let anySelected = false;
+                for (let opt of examens.options) {
+                    if (opt.selected) {
+                        anySelected = true;
+                        break;
+                    }
+                }
+
+                if (!anySelected) {
+                    alert("Veuillez sélectionner au moins un examen.");
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            console.log("Formulaire soumis !");
+        });
+
+        // Initialiser dynamiquement la taille de la liste
+        window.addEventListener('DOMContentLoaded', () => {
+            const select = document.getElementById("examens");
+            const totalOptions = select.options.length;
+            select.size = Math.min(totalOptions, 12);
+        });
+    </script>
+</body>
+</html>
