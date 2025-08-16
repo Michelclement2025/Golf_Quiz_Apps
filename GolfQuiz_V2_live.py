@@ -13,11 +13,22 @@ from flask_session import Session
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'une_cle_secrete_a_modifier'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = os.path.join('/tmp', 'flask_session')  # dossier sûr sur Render
 app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, '.flask_session')
+app.config['SESSION_USE_SIGNER'] = True  # sécurise le cookie de session
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = True  # Render est en HTTPS
 os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 Session(app)
+
+# Désactive le cache navigateur pour les pages HTML
+@app.after_request
+def add_no_cache_headers(resp):
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 # ===================================
 # Chemins & constantes
