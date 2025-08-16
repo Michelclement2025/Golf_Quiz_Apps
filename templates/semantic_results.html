@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse de la situation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            background-color: #f0f0f0;
+            height: 100vh;
+        }
+
+        .left-panel {
+            flex: 1;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .left-panel img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .right-panel {
+            flex: 2;
+            padding: 30px;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .situation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 6px solid #4CAF50;
+            border-radius: 4px;
+        }
+
+        .situation h3 {
+            margin-top: 0;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .back-button {
+            margin-top: 30px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .user-question {
+            margin-bottom: 30px;
+            font-size: 16px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <img src="{{ url_for('static', filename='images/Corbeau_et_le_renard.png') }}" alt="Illustration">
+    </div>
+
+    <div class="right-panel">
+        <h1>Analyse de la situation</h1>
+
+        <div class="user-question">
+            <span class="label">Votre situation :</span><br>
+            {{ question_utilisateur }}
+        </div>
+
+        {% if gpt_response %}
+            <div class="situation" style="border-left-color: #00BFFF;">
+                <h3 style="color: #00BFFF;">Le point de vue selon les règles</h3>
+                <p>{{ gpt_response.replace('\n','<br>')|safe }}</p>
+            </div>
+        {% endif %}
+
+        {% for s in suggestions %}
+            <div class="situation">
+                <h3>Situation similaire</h3>
+                <p><span class="label">Pertinence :</span> {{ s.score }}</p>
+                <p><span class="label">Question :</span><br> {{ s.question|safe }}</p>
+                <p><span class="label">Type de question :</span> {{ s.type }}</p>
+                <p><span class="label">Réponse :</span> {{ s.reponse }}</p>
+                <p><span class="label">Sous-règle :</span> {{ s.sous_regle }}</p>
+
+                <div style="margin-top: 10px;">
+                    <p><span class="label">Explication :</span></p>
+                    <div style="margin-left: 15px; color: #333;">
+                        {{ s.explication|replace('\n','<br>')|safe }}
+                    </div>
+
+                    <p style="margin-top: 8px;"><span class="label">Commentaire :</span></p>
+                    <div style="margin-left: 15px; color: #333;">
+                        {{ s.commentaire|replace('\n','<br>')|safe }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <a href="{{ url_for('index') }}" class="back-button">Retour au menu</a>
+    </div>
+</body>
+</html>

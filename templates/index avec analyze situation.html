@@ -71,7 +71,7 @@
 </head>
 <body>
 <div style="background-color: #f5e9d3; padding: 15px; margin-top: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-style: italic; color: black; font-size: 16px;">
-    Ce programme est un prototype, son utilisation est réservée.Des erreurs ou bugs sont possibles. En cas doute informer Michel et/ou Pascal
+    Ce programme est un prototype, son utilisation est réservée. Les données utilisées sont sous copyrigth de la FFG et du R&A
 </div>
 
 <h1>Entrainement aux Règles, sélection du type de test</h1>
@@ -93,7 +93,19 @@
                 </select>
             </div>
 
-            <!-- Bloc 'OU' et 'Analysez une situation' SUPPRIMÉS -->
+            <div style="text-align: center; font-weight: bold; font-size: 18px; margin: 15px 0;">OU</div>
+
+            <div id="question-libre" style="margin-top: 20px;">
+                <label for="user_question">Analysez une situation (50 mots max) :</label><br>
+                <textarea name="user_question" id="user_question" rows="3" maxlength="300" style="font-size: 16px;"></textarea>
+
+                <label for="nb_matchs">Nombre de situations similaires à vérifier :</label>
+                <select name="nb_matchs" id="nb_matchs">
+                    <option value="3">3</option>
+                    <option value="5" selected>5</option>
+                    <option value="7">7</option>
+                </select>
+            </div>
 
             <div class="test-options">
                 <div class="test-section" id="section-simple" style="display:none;">
@@ -136,7 +148,6 @@
                             <option value="10" selected>10</option>
                             <option value="15">15</option>
                             <option value="20">20</option>
-                            <option value="30">30</option>
                         </select>
                     </div>
                 </div>
@@ -164,8 +175,9 @@
 <script>
     function toggleSections() {
         const mode = document.getElementById("mode").value;
-        document.getElementById("section-simple").style.display = (mode === "test_simple") ? "block" : "none";
-        document.getElementById("section-examen").style.display = (mode === "examen_blanc") ? "block" : "none";
+        document.getElementById("section-simple").style.display = mode === "test_simple" ? "block" : "none";
+        document.getElementById("section-examen").style.display = mode === "examen_blanc" ? "block" : "none";
+        document.getElementById("question-libre").style.display = mode === "" ? "block" : "none";
     }
 
     function selectAllExamens() {
@@ -177,9 +189,15 @@
 
     document.getElementById("quiz-form").addEventListener("submit", function (e) {
         const mode = document.getElementById("mode").value;
-        if (!mode) {
-            alert("Veuillez choisir un type de test.");
+        const question = document.getElementById("user_question").value.trim();
+
+        if (!mode && question.length === 0) {
+            alert("Veuillez choisir un type de test ou poser une question.");
             e.preventDefault();
+        }
+
+        if (!mode && question.length > 0) {
+            this.action = "/semantic_query";
         }
     });
 
