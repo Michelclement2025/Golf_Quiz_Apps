@@ -33,7 +33,8 @@ def add_no_cache_headers(resp):
 # ===================================
 # Chemins & constantes
 # ===================================
-EXCEL_FILE = "BDEssaiPrograme042025VFQCMRA.xlsx"
+# EXCEL_FILE = "BDEssaiPrograme042025VFQCMRA.xlsx"
+EXCEL_FILE = "basededonnees082025V1.xlsx"
 
 # Pages examen (libellé, clé-type, minutes)
 PAGES = [
@@ -46,9 +47,11 @@ PAGES = [
 # ===================================
 # Chargement du fichier Excel
 # ===================================
+
 try:
     # Forcer en chaînes pour éviter les ".0" et mélanges de types
     DF = pd.read_excel(EXCEL_FILE, dtype=str).fillna("")
+
     # Nettoyages usuels
     if 'réponse' in DF.columns:
         DF['réponse'] = DF['réponse'].apply(
